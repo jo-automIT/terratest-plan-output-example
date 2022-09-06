@@ -1,8 +1,9 @@
-package test
+package testing
 
 import (
+	"fmt"
 	"testing"
-
+	"reflect"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,7 +14,7 @@ func TestTerraformBasicExample(t *testing.T) {
 
 	expectedText := "test"
 	expectedList := []string{expectedText}
-	expectedMap := map[string]string{"expected": expectedText}
+	expectedMap := map[string]interface{}{"expected": expectedText}
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		// website::tag::1::Set the path to the Terraform code that will be tested.
@@ -36,24 +37,42 @@ func TestTerraformBasicExample(t *testing.T) {
 		NoColor: true,
 	})
 
-	// website::tag::4::Clean up resources with "terraform destroy". Using "defer" runs the command at the end of the test, whether the test succeeds or fails.
-	// At the end of the test, run `terraform destroy` to clean up any resources that were created
 	defer terraform.Destroy(t, terraformOptions)
 
-	// website::tag::2::Run "terraform init" and "terraform apply".
-	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
-	terraform.InitAndApply(t, terraformOptions)
+	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, terraformOptions)
 
-	// Run `terraform output` to get the values of output variables
-	actualTextExample := terraform.Output(t, terraformOptions, "example")
-	actualTextExample2 := terraform.Output(t, terraformOptions, "example2")
-	actualExampleList := terraform.OutputList(t, terraformOptions, "example_list")
-	actualExampleMap := terraform.OutputMap(t, terraformOptions, "example_map")
+	assert.Equal(t, expectedText, PlanOutput(plan, "example"))
+	assert.Equal(t, []string{"test"}, PlanOutputList(plan, "example_list"))
+	assert.Equal(t, map[string]interface{}{"expected": "test"}, PlanOutputMap(plan, "example_map"))
+}
 
-	// website::tag::3::Check the output against expected values.
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedText, actualTextExample)
-	assert.Equal(t, expectedText, actualTextExample2)
-	assert.Equal(t, expectedList, actualExampleList)
-	assert.Equal(t, expectedMap, actualExampleMap)
+func PlanOutput(p *terraform.PlanStruct, key string) interface{} {
+	return p.RawPlan.PlannedValues.Outputs[key].Value
+}
+
+func PlanOutputList(p *terraform.PlanStruct, key string) []string {
+	planOutRaw := p.RawPlan.PlannedValues.Outputs[key].Value
+	var out []string
+	switch reflect.TypeOf(planOutRaw).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(planOutRaw)
+
+		for i := 0; i < s.Len(); i++ {
+			out = append(out, s.Index(i).Elem().String())
+		}
+	}
+	return out
+}
+
+func PlanOutputMap(p *terraform.PlanStruct, key string) map[string]interface{} {
+	planOutRaw := p.RawPlan.PlannedValues.Outputs[key].Value
+	fmt.Println(planOutRaw)
+	switch reflect.TypeOf(planOutRaw).Kind() {
+	case reflect.Map:
+		s := reflect.ValueOf(planOutRaw)
+		i := s.Interface()
+		out := i.(map[string]interface{})
+		return out
+	}
+	return nil
 }

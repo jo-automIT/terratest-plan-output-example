@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/gruntwork-io/terratest v0.40.20
+	github.com/ompluscator/dynamic-struct v1.3.0
 	github.com/stretchr/testify v1.8.0
 )
 
