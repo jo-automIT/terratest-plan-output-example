@@ -1,4 +1,5 @@
 *.tfstate
+*.tfplan
 *.tfstate.backup
 *.lock.hcl
 /examples/terraform-basic-example/.terraform/

@@ -12,9 +12,9 @@ import (
 func TestTerraformBasicExample(t *testing.T) {
 	t.Parallel()
 
-	expectedText := "test"
-	expectedList := []string{expectedText}
-	expectedMap := map[string]interface{}{"expected": expectedText}
+	// expectedText := "test"
+	// expectedList := []string{expectedText}
+	// expectedMap := map[string]interface{}{"expected": expectedText}
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		// website::tag::1::Set the path to the Terraform code that will be tested.
@@ -22,13 +22,13 @@ func TestTerraformBasicExample(t *testing.T) {
 		TerraformDir: "../examples/terraform-basic-example",
 
 		// Variables to pass to our Terraform code using -var options
-		Vars: map[string]interface{}{
-			"example": expectedText,
+		// Vars: map[string]interface{}{
+		// 	"example": expectedText,
 
-			// We also can see how lists and maps translate between terratest and terraform.
-			"example_list": expectedList,
-			"example_map":  expectedMap,
-		},
+		// 	// We also can see how lists and maps translate between terratest and terraform.
+		// 	"example_list": expectedList,
+		// 	"example_map":  expectedMap,
+		// },
 
 		// Variables to pass to our Terraform code using -var-file options
 		VarFiles: []string{"varfile.tfvars"},
@@ -41,7 +41,7 @@ func TestTerraformBasicExample(t *testing.T) {
 
 	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, terraformOptions)
 
-	assert.Equal(t, expectedText, PlanOutput(plan, "example"))
+	assert.Equal(t, "test", PlanOutput(plan, "example"))
 	assert.Equal(t, []string{"test"}, PlanOutputList(plan, "example_list"))
 	assert.Equal(t, map[string]interface{}{"expected": "test"}, PlanOutputMap(plan, "example_map"))
 }
