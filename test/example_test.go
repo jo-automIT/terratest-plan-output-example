@@ -27,6 +27,7 @@ func TestTerraformBasicExample(t *testing.T) {
 	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, terraformOptions)
 
 	assert.Equal(t, "test", PlanOutput(plan, "example"))
+	assert.Equal(t, "test2", PlanOutput(plan, "example2"))
 	assert.Equal(t, []string{"test"}, PlanOutputList(plan, "example_list"))
 	assert.Equal(t, map[string]interface{}{"expected": "test"}, PlanOutputMap(plan, "example_map"))
 }
