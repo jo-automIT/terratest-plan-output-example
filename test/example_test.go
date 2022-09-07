@@ -12,23 +12,8 @@ import (
 func TestTerraformBasicExample(t *testing.T) {
 	t.Parallel()
 
-	// expectedText := "test"
-	// expectedList := []string{expectedText}
-	// expectedMap := map[string]interface{}{"expected": expectedText}
-
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		// website::tag::1::Set the path to the Terraform code that will be tested.
-		// The path to where our Terraform code is located
 		TerraformDir: "../examples/terraform-basic-example",
-
-		// Variables to pass to our Terraform code using -var options
-		// Vars: map[string]interface{}{
-		// 	"example": expectedText,
-
-		// 	// We also can see how lists and maps translate between terratest and terraform.
-		// 	"example_list": expectedList,
-		// 	"example_map":  expectedMap,
-		// },
 
 		// Variables to pass to our Terraform code using -var-file options
 		VarFiles: []string{"varfile.tfvars"},
